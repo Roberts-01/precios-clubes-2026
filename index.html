@@ -1,9 +1,10 @@
+HTML
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Consulta de Cuotas</title>
+  <title>Precios 2026</title>
   <style>
     :root {
       --primary: #1e293b;
@@ -262,8 +263,9 @@
       const listaOriginal = (typeof DATA_PRECIOS !== 'undefined' && DATA_PRECIOS[clubActual]) ? DATA_PRECIOS[clubActual] : [];
 
       const filtrados = listaOriginal.filter(item => {
-        return (item.codigo && String(item.codigo).toLowerCase().includes(termino)) || 
-               (item.descripcion && String(item.descripcion).toLowerCase().includes(termino));
+        const cod = String(item.codigo || '').toLowerCase();
+        const desc = String(item.descripcion || '').toLowerCase();
+        return cod.includes(termino) || desc.includes(termino);
       });
 
       renderizar(filtrados);
