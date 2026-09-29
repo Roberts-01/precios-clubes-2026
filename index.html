@@ -1,66 +1,41 @@
-# Let's inspect why the previous HTML failed:
-# In the previous message, I wrote:
-# <script src="data.js"></script>
-# BUT data.js wasn't present or wasn't loaded! So DATA_PRECIOS was empty!
-# That is why it says "0 concepto(s)" and "No se encontraron conceptos que coincidan con la búsqueda."!
-# To make it work in 1 single step without any missing data, we need the HTML file to contain ALL the data inside <script> const DATA_PRECIOS = ... </script> AND NOT HAVE <script src="data.js"></script>!
-
-# Let's verify our exact script and generate a ready-to-download file and also give clear instructions.
-import json
-import pandas as pd
-
-xls = pd.ExcelFile('precios 2026.xlsx')
-data_dict = {}
-for sheet in xls.sheet_names:
-    raw = pd.read_excel('precios 2026.xlsx', sheet_name=sheet, header=None)
-    df = raw.iloc[4:].copy()
-    df.columns = ['codigo', 'descripcion', 'precio']
-    df = df.dropna(subset=['codigo', 'descripcion'])
-    df['codigo'] = df['codigo'].astype(str).str.strip().str.replace('.0', '', regex=False)
-    df['descripcion'] = df['descripcion'].astype(str).str.strip()
-    df['precio'] = pd.to_numeric(df['precio'], errors='coerce').fillna(0)
-    data_dict[sheet] = df.to_dict(orient='records')
-
-json_str = json.dumps(data_dict, ensure_ascii=False)
-
-html_code = f"""<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Precios 2026</title>
   <style>
-    * {{
+    * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
-    }}
-    body {{
+    }
+    body {
       background-color: #f8fafc;
       color: #0f172a;
       padding: 25px 15px;
-    }}
-    .container {{
+    }
+    .container {
       max-width: 950px;
       margin: 0 auto;
-    }}
-    header {{
+    }
+    header {
       text-align: center;
       margin-bottom: 20px;
-    }}
-    header p {{
+    }
+    header p {
       color: #64748b;
       font-size: 1rem;
       font-weight: 600;
-    }}
-    .tabs-container {{
+    }
+    .tabs-container {
       display: flex;
       justify-content: center;
       gap: 10px;
       margin-bottom: 18px;
-    }}
-    .tab-button {{
+    }
+    .tab-button {
       padding: 10px 24px;
       font-size: 0.95rem;
       font-weight: bold;
@@ -70,14 +45,14 @@ html_code = f"""<!DOCTYPE html>
       color: #475569;
       cursor: pointer;
       transition: all 0.2s;
-    }}
-    .tab-button.active {{
+    }
+    .tab-button.active {
       background: #dc2626;
       color: #ffffff;
       border-color: #dc2626;
       box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);
-    }}
-    .search-card {{
+    }
+    .search-card {
       background: #ffffff;
       padding: 14px 18px;
       border-radius: 10px;
@@ -86,71 +61,71 @@ html_code = f"""<!DOCTYPE html>
       display: flex;
       flex-direction: column;
       gap: 10px;
-    }}
-    @media (min-width: 600px) {{
-      .search-card {{
+    }
+    @media (min-width: 600px) {
+      .search-card {
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-      }}
-    }}
-    .search-input {{
+      }
+    }
+    .search-input {
       width: 100%;
       padding: 10px 14px;
       font-size: 1rem;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
       outline: none;
-    }}
-    .search-input:focus {{
+    }
+    .search-input:focus {
       border-color: #dc2626;
-    }}
-    .counter-badge {{
+    }
+    .counter-badge {
       font-size: 0.9rem;
       font-weight: bold;
       color: #64748b;
       white-space: nowrap;
-    }}
-    .table-container {{
+    }
+    .table-container {
       background: #ffffff;
       border-radius: 10px;
       border: 1px solid #e2e8f0;
       overflow-x: auto;
-    }}
-    table {{
+    }
+    table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
-    }}
-    th, td {{
+    }
+    th, td {
       padding: 12px 16px;
       border-bottom: 1px solid #e2e8f0;
-    }}
-    th {{
+    }
+    th {
       background-color: #f1f5f9;
       color: #475569;
       font-size: 0.85rem;
       text-transform: uppercase;
-    }}
-    tbody tr:hover {{
+    }
+    tbody tr:hover {
       background-color: #f8fafc;
-    }}
-    .col-code {{
+    }
+    .col-code {
       font-family: monospace;
       color: #64748b;
       font-weight: bold;
       width: 120px;
-    }}
-    .col-price {{
+    }
+    .col-price {
       text-align: right;
       font-weight: bold;
       color: #047857;
       width: 150px;
-    }}
-    th.col-price {{
+    }
+    th.col-price {
       text-align: right;
-    }}
-    .empty-state {{
+    }
+    .empty-state {
       padding: 40px;
       text-align: center;
       color: #64748b;
@@ -200,73 +175,457 @@ html_code = f"""<!DOCTYPE html>
   </div>
 
   <script>
-    const DATA_PRECIOS = {json_str};
+    const DATA_PRECIOS = {
+      "Colomos": [
+        {"codigo": "4010114", "descripcion": "APORT. DE MANTENIMIENTO NUEVAS FAMILIAS", "precio": 16381},
+        {"codigo": "4010101", "descripcion": "APORTACION DE MANTENIMIENTO", "precio": 13690},
+        {"codigo": "4040416", "descripcion": "APORTACION DE MANTENIMIENTO 65PO", "precio": 8899},
+        {"codigo": "4010339", "descripcion": "APORTACION DE MANTENIMIENTO 70%", "precio": 9583},
+        {"codigo": "4010338", "descripcion": "APORTACION DE MANTENIMIENTO ESPECIAL 50%", "precio": 6845},
+        {"codigo": "4010369", "descripcion": "AQUAEROBICS 3 DIAS POR SEMANA", "precio": 420},
+        {"codigo": "4040427", "descripcion": "AQUAEROBICS 3 DIAS POR SEMANA 50% BECA", "precio": 210},
+        {"codigo": "4010281", "descripcion": "BASQUET BOL REFUERZOS 1 DIA POR SEMANA", "precio": 1850},
+        {"codigo": "4040480", "descripcion": "BASQUETBOL FEMENIL - JUVENIL REFUERZO", "precio": 0},
+        {"codigo": "4040476", "descripcion": "BASQUETBOL REFUERZO 2 DIAS POR SEMANA", "precio": 2300},
+        {"codigo": "4040477", "descripcion": "BASQUETBOL REFUERZO 3 DIAS POR SEMANA", "precio": 2800},
+        {"codigo": "4010376", "descripcion": "CERTIFICADO FAMILIAR TEMPORAL", "precio": 90000},
+        {"codigo": "4010228", "descripcion": "CLAVADOS 2 DIAS POR SEMANA", "precio": 800},
+        {"codigo": "4010227", "descripcion": "CLAVADOS 4 DIAS POR SEMANA", "precio": 1300},
+        {"codigo": "4040424", "descripcion": "CLUB DE CONVERSACION EN INGLES", "precio": 286},
+        {"codigo": "4010156", "descripcion": "COBRO DE TAG", "precio": 187},
+        {"codigo": "4010192", "descripcion": "CUOTA CERT. TEMP. ESP.", "precio": 14736},
+        {"codigo": "4010105", "descripcion": "CUOTA COORPORATIVA (75%)", "precio": 10268},
+        {"codigo": "4010219", "descripcion": "CUOTA COORPORATIVA ESPECIAL", "precio": 15581},
+        {"codigo": "4010110", "descripcion": "CUOTA ESPECIAL 10%", "precio": 1369},
+        {"codigo": "4010184", "descripcion": "CUOTA JR (20%)", "precio": 2738},
+        {"codigo": "4010195", "descripcion": "CUOTA JR A", "precio": 2738},
+        {"codigo": "4010116", "descripcion": "CUOTA JR B", "precio": 4107},
+        {"codigo": "4010197", "descripcion": "CUOTA JR C", "precio": 4792},
+        {"codigo": "4010107", "descripcion": "CUOTA JR SENIOR (15%)", "precio": 2054},
+        {"codigo": "4010108", "descripcion": "CUOTA JR SENIOR (30%)", "precio": 4107},
+        {"codigo": "4010112", "descripcion": "CUOTA JR SENIOR (35%)", "precio": 4792},
+        {"codigo": "4010113", "descripcion": "CUOTA JUNIOR (5%)", "precio": 685},
+        {"codigo": "4010109", "descripcion": "CUOTA JUNIOR CASADO", "precio": 8899},
+        {"codigo": "4010111", "descripcion": "CUOTA JUNIOR CASADO (80%)", "precio": 10952},
+        {"codigo": "4010340", "descripcion": "CUOTA JUNIOR ESPECIAL", "precio": 1560},
+        {"codigo": "4010370", "descripcion": "ESC DE FUTBOL 2008 - 2009 - 2010 REFUERZO 10% HNOS", "precio": 2080},
+        {"codigo": "4010371", "descripcion": "ESC DE FUTBOL 2008 - 2009 - 2010 REFUERZO 20% BECA", "precio": 1850},
+        {"codigo": "4040404", "descripcion": "ESC DE FUTBOL 2008,2009-2010,2011 REFUERZO 10% HNO", "precio": 0},
+        {"codigo": "4040408", "descripcion": "ESC DE FUTBOL 2008,2009-2010,2011 REFUERZO 15% HNO", "precio": 0},
+        {"codigo": "4040405", "descripcion": "ESC DE FUTBOL 2011,2012,2013 REFUERZO 20% BECA", "precio": 1705},
+        {"codigo": "4010354", "descripcion": "ESC DE FUTBOL CAT 14-15-16-17-18-19 -20-21REF 20%", "precio": 1136},
+        {"codigo": "4040418", "descripcion": "ESC DE FUTBOL CAT 14-15-16-17-18-19-20-21REFUERZO", "precio": 1420},
+        {"codigo": "4010236", "descripcion": "ESC DE FUTBOL CAT.14-15-16-17-18-19-20-21 REF 30%", "precio": 995},
+        {"codigo": "4010247", "descripcion": "ESC DE TAE KWO DO 2 DIAS POR SEMANA 10% POR HNOS", "precio": 0},
+        {"codigo": "4010241", "descripcion": "ESC DE TENIS BASICOS E INTERMEDIO 3 DIAS POR SEMAN", "precio": 2000},
+        {"codigo": "4040496", "descripcion": "ESC DE TENIS COMPET.2 SOCIOS (4 DIAS X SEM) 10% HN", "precio": 4140},
+        {"codigo": "4040492", "descripcion": "ESC DE TENIS COMPETITIVO 1 (3 DIAS POR SEMANA) 10%", "precio": 2700},
+        {"codigo": "4040493", "descripcion": "ESC DE TENIS COMPETITIVO 1 (3 DIAS X SEM) REF", "precio": 4000},
+        {"codigo": "4040491", "descripcion": "ESC DE TENIS COMPETITIVO 1 SOCIOS 3 DIAS X SEM", "precio": 3000},
+        {"codigo": "4040497", "descripcion": "ESC DE TENIS COMPETITIVO 2 ( 4 DIAS X SEM) REF", "precio": 5300},
+        {"codigo": "4010243", "descripcion": "ESC DE TENIS COMPETITIVO 2 SOCIO 4 DIAS X SEM 50%", "precio": 2300},
+        {"codigo": "4040495", "descripcion": "ESC DE TENIS COMPETITIVO 2 SOCIOS (4 DIAS X SEM)", "precio": 4600},
+        {"codigo": "4040425", "descripcion": "ESC DE TENIS COMPETITIVO 3 (5 DIAS X SEM) SOC 25%", "precio": 4125},
+        {"codigo": "4040462", "descripcion": "ESC DE TENIS COMPETITIVO 3 (5 DIAS X SEM/ REFUERZO", "precio": 6600},
+        {"codigo": "4040486", "descripcion": "ESC DE TENIS COMPETITIVO 3-5 DIAS X SEM 10% HNO RE", "precio": 5940},
+        {"codigo": "4010233", "descripcion": "ESC DE TENIS COMPETITIVO I SOCIOS 3 DIAS X SEM 25%", "precio": 2250},
+        {"codigo": "4010244", "descripcion": "ESC DE TENIS PRECOMPETITIVO 2 DIAS POR SEM 10% HNO", "precio": 2216},
+        {"codigo": "4040467", "descripcion": "ESC DE TENIS PRECOMPETITIVO 3 DIAS X SEM 10% HNO", "precio": 0},
+        {"codigo": "4040429", "descripcion": "ESC FUTBOL CAT. 2008 - 2009  REFUERZO 35% BECA", "precio": 1505},
+        {"codigo": "4040482", "descripcion": "ESC FUTBOL CAT.14, 15,16 17, 18, 19 REF 50% BECA", "precio": 710},
+        {"codigo": "4040494", "descripcion": "ESC TENIS COMPETITIVO 1 (3 DIAS X SEM ) REF 10% HN", "precio": 3600},
+        {"codigo": "4040498", "descripcion": "ESC TENIS COMPETITIVO 2 (4 DIASX SEM) REF 10% HN", "precio": 4770},
+        {"codigo": "4040484", "descripcion": "ESC.DE TENIS BASICOS E INTER.2 DIAS POR SEM 10% HN", "precio": 2000},
+        {"codigo": "4010240", "descripcion": "ESC.DE TENIS BASICOS E INTERM.3 DIAS POR SEM Y FOR", "precio": 2310},
+        {"codigo": "4010373", "descripcion": "ESC.DE TENIS BASICOS E INTERMEDIOS 2 DIAS POR SEM", "precio": 2222},
+        {"codigo": "4040456", "descripcion": "ESC.DE TENIS PRECOMPETITIVO INFANTIL 4 DIAS 10%HNO", "precio": 2700},
+        {"codigo": "4040457", "descripcion": "ESC.DE TENIS PRECOMPETITIVO/ COMPETI 4 DIAS 10%HNO", "precio": 0},
+        {"codigo": "4040499", "descripcion": "ESCUELA DE BOX", "precio": 900},
+        {"codigo": "4010229", "descripcion": "ESCUELA DE FUTBOL 2002 Y 2003 SOCIOS", "precio": 0},
+        {"codigo": "4010231", "descripcion": "ESCUELA DE FUTBOL 2004 Y 2005 REFUERZO", "precio": 0},
+        {"codigo": "4040402", "descripcion": "ESCUELA DE FUTBOL 2004 Y 2005 REFUERZO 10% HERMANO", "precio": 0},
+        {"codigo": "4040403", "descripcion": "ESCUELA DE FUTBOL 2004 Y 2005 REFUERZO 15% HERMANO", "precio": 0},
+        {"codigo": "4010215", "descripcion": "ESCUELA DE FUTBOL 2008 - 2009 - 2010 REFUERZO", "precio": 2315},
+        {"codigo": "4010223", "descripcion": "ESCUELA DE FUTBOL 2008 - 2009 -2010 15% HNOS REFUE", "precio": 1965},
+        {"codigo": "4010217", "descripcion": "ESCUELA DE FUTBOL 2008 - 2009 50% BECA REF", "precio": 1160},
+        {"codigo": "4010218", "descripcion": "ESCUELA DE FUTBOL 2008 2009 - 2010-2011 SOCIO", "precio": 1025},
+        {"codigo": "4010234", "descripcion": "ESCUELA DE FUTBOL 2010,2011,2012,2013 REF BECA 50%", "precio": 1070},
+        {"codigo": "4010120", "descripcion": "ESCUELA DE FUTBOL 2011,2012,2013 40% REFUER", "precio": 1275},
+        {"codigo": "4010358", "descripcion": "ESCUELA DE FUTBOL 2011-2012-2013 REFUERZO", "precio": 2125},
+        {"codigo": "4010357", "descripcion": "ESCUELA DE FUTBOL 2012 - 2013 SOCIO", "precio": 950},
+        {"codigo": "4010216", "descripcion": "ESCUELA DE FUTBOL 3RA 30% REFUERZOS", "precio": 1190},
+        {"codigo": "4040465", "descripcion": "ESCUELA DE FUTBOL 3RA DIVISION Y 2006 REFUERZOS", "precio": 1705},
+        {"codigo": "4040466", "descripcion": "ESCUELA DE FUTBOL 3RA DIVISION Y 2006 SOCIOS", "precio": 1380},
+        {"codigo": "4040411", "descripcion": "ESCUELA DE FUTBOL 3RA DIVISON REF 50% BECA", "precio": 850},
+        {"codigo": "4010211", "descripcion": "ESCUELA DE FUTBOL CAT.14-15-16-17-18 -19-20-21 SOC", "precio": 700},
+        {"codigo": "4010232", "descripcion": "ESCUELA DE FUTBOL PORTERO 15% REFUERZOS", "precio": 2655},
+        {"codigo": "4010235", "descripcion": "ESCUELA DE FUTBOL PORTERO 20% REFUERZOS", "precio": 2500},
+        {"codigo": "4040400", "descripcion": "ESCUELA DE FUTBOL PORTERO REFUERZO 10% HERMANOS", "precio": 2810},
+        {"codigo": "4040406", "descripcion": "ESCUELA DE FUTBOL PORTERO REFUERZO 30% BECA", "precio": 2185},
+        {"codigo": "4040407", "descripcion": "ESCUELA DE FUTBOL PORTERO REFUERZO 50% BECA", "precio": 1560},
+        {"codigo": "4010209", "descripcion": "ESCUELA DE FUTBOL PORTERO SOCIO", "precio": 1260},
+        {"codigo": "4010212", "descripcion": "ESCUELA DE FUTBOL PORTEROS REFUERZOS", "precio": 3120},
+        {"codigo": "4010214", "descripcion": "ESCUELA DE FUTBOL SUB 20, 2004 Y 2005 SOCIO", "precio": 0},
+        {"codigo": "4010206", "descripcion": "ESCUELA DE GIMNASIA 2 DIAS POR SEMANA", "precio": 850},
+        {"codigo": "4010246", "descripcion": "ESCUELA DE GIMNASIA 2 DIAS POR SEMANA 10% POR HNOS", "precio": 765},
+        {"codigo": "4010204", "descripcion": "ESCUELA DE GIMNASIA 3 DIAS POR SEMANA", "precio": 1150},
+        {"codigo": "4010226", "descripcion": "ESCUELA DE GIMNASIA 3 DIAS POR SEMANA 10% POR HNOS", "precio": 1035},
+        {"codigo": "4040415", "descripcion": "ESCUELA DE GIMNASIA DIARIO Y COMPETITIVA", "precio": 1900},
+        {"codigo": "4010375", "descripcion": "ESCUELA DE GIMNASIA DIARIO Y COMPETITIVA 10% HNO", "precio": 1710},
+        {"codigo": "4010230", "descripcion": "ESCUELA DE MINITENIS 1 DIA POR SEMANA", "precio": 0},
+        {"codigo": "4010237", "descripcion": "ESCUELA DE MINITENIS 2 DIAS POR SEMANA", "precio": 1900},
+        {"codigo": "4010238", "descripcion": "ESCUELA DE MINITENIS 2 DIAS POR SEMANA 10% POR HNO", "precio": 1710},
+        {"codigo": "4010239", "descripcion": "ESCUELA DE MINITENIS 4 DIAS POR SEMANA", "precio": 2570},
+        {"codigo": "4040481", "descripcion": "ESCUELA DE MINITENIS 4 DIAS POR SEMANA 10% HNO", "precio": 2203},
+        {"codigo": "4010127", "descripcion": "ESCUELA DE NATACION 2 DIAS POR SEMANA", "precio": 815},
+        {"codigo": "4010205", "descripcion": "ESCUELA DE NATACION 2 DIAS POR SEMANA 10% POR HNO", "precio": 735},
+        {"codigo": "4040414", "descripcion": "ESCUELA DE NATACION 3 DIAS POR SEMANA", "precio": 1190},
+        {"codigo": "4040423", "descripcion": "ESCUELA DE NATACION 3 DIAS POR SEMANA 10% POR HNOS", "precio": 1071},
+        {"codigo": "4040413", "descripcion": "ESCUELA DE NATACION TODOS LOS DIAS", "precio": 1580},
+        {"codigo": "4040410", "descripcion": "ESCUELA DE NATACION TODOS LOS DIAS 10% HERM", "precio": 1425},
+        {"codigo": "4010277", "descripcion": "ESCUELA DE TAE KWO DO 1 DIA POR SEMANA", "precio": 0},
+        {"codigo": "4010132", "descripcion": "ESCUELA DE TAE KWO DO 2 DIAS POR SEMANA", "precio": 0},
+        {"codigo": "4040426", "descripcion": "ESCUELA DE TENIS BASICO E INTERMEDIO 4 DIAS", "precio": 3000},
+        {"codigo": "4010139", "descripcion": "ESCUELA DE TENIS COMPETITIVO 3 -5 DIAS X SEM SOCIO", "precio": 5500},
+        {"codigo": "4040440", "descripcion": "ESCUELA DE TENIS COMPETITIVO 3-5 DIAS X SEM 10% HN", "precio": 4950},
+        {"codigo": "4010245", "descripcion": "ESCUELA DE TENIS PRECOMPETITIVO 2 DIAS POR SEMANA", "precio": 2462},
+        {"codigo": "4010341", "descripcion": "ESCUELA DE TENIS PRECOMPETITIVO 3 DIAS POR SEMANA", "precio": 0},
+        {"codigo": "4040417", "descripcion": "ESCUELA DE TENIS PRECOMPETITIVO 4 DIAS POR SEMANA", "precio": 0},
+        {"codigo": "4010242", "descripcion": "ESCUELA DE TENIS PROGRESIVO 4 DIAS POR SEMANA", "precio": 0},
+        {"codigo": "4040433", "descripcion": "ESCUELA FUTBOL CAT. 09,10,11 REFUERZO 40% BECA", "precio": 0},
+        {"codigo": "4040431", "descripcion": "ESCUELA FUTBOL CAT. 11,12,13 REFUERZO 10% HERMANOS", "precio": 1915},
+        {"codigo": "4040432", "descripcion": "ESCUELA FUTBOL CAT. 11,12,13 REFUERZO 15% HERMANOS", "precio": 1810},
+        {"codigo": "4040428", "descripcion": "ESCUELA PADEL 1 DIAS POR SEMANA", "precio": 450},
+        {"codigo": "4040430", "descripcion": "ESCUELA PADEL 2 DIAS POR SEMANA", "precio": 980},
+        {"codigo": "4040420", "descripcion": "FUTBOL SUB 20", "precio": 0},
+        {"codigo": "4010283", "descripcion": "FUTBOL VETERANOS 1 DIA POR SEMANA", "precio": 1850},
+        {"codigo": "4040478", "descripcion": "FUTBOL VETERANOS REFUERZO 2 DIAS POR SEMANA", "precio": 2300},
+        {"codigo": "4040479", "descripcion": "FUTBOL VETERANOS REFUERZO 3 DIAS POR SEMANA", "precio": 2800},
+        {"codigo": "4010384", "descripcion": "HERMANO / SOBRINO CASADO HASTA + DE 40 AÑOS", "precio": 13690},
+        {"codigo": "4010383", "descripcion": "HERMANO / SOBRINO CASADO HASTA 39 AÑOS", "precio": 13690},
+        {"codigo": "4010380", "descripcion": "HERMANO / SOBRINO SOLTERO 25 A 29 AÑOS", "precio": 4107},
+        {"codigo": "4010381", "descripcion": "HERMANO / SOBRINO SOLTERO 30 A 34 AÑOS", "precio": 5476},
+        {"codigo": "4010382", "descripcion": "HERMANO / SOBRINO SOLTERO MAYOR DE 35 AÑOS", "precio": 6161},
+        {"codigo": "4040485", "descripcion": "INSCRIPCIÓN 3RA DIVISIÓN", "precio": 0},
+        {"codigo": "4040401", "descripcion": "INSCRIPCION ESCUELA DE FUTBOL INVITADOS DEPORTIVO", "precio": 2900},
+        {"codigo": "4040409", "descripcion": "INSCRIPCION ESCUELA DE FUTBOL SIN LIGA", "precio": 700},
+        {"codigo": "4010201", "descripcion": "INSCRIPCION ESCUELA DE FUTBOL SOCIOS", "precio": 2450},
+        {"codigo": "4010367", "descripcion": "INSCRIPCION GIMNASIA OLIMPICA", "precio": 430},
+        {"codigo": "4010368", "descripcion": "INSCRIPCION NATACION", "precio": 430},
+        {"codigo": "4010374", "descripcion": "INSCRIPCION TENIS", "precio": 1000},
+        {"codigo": "4010342", "descripcion": "INSCRIPCION TKD ENERO A JUNIO", "precio": 0},
+        {"codigo": "4010147", "descripcion": "INVITADO ADULTO", "precio": 990},
+        {"codigo": "4010150", "descripcion": "INVITADO NIÑO", "precio": 790},
+        {"codigo": "4010387", "descripcion": "JR CASADO SENIOR 100%", "precio": 13690},
+        {"codigo": "4010385", "descripcion": "JR SENIOR 50%", "precio": 6845},
+        {"codigo": "4010386", "descripcion": "JR SENIOR 60%", "precio": 8214},
+        {"codigo": "4010151", "descripcion": "LOCKER RENTA ANUAL", "precio": 1500},
+        {"codigo": "4010202", "descripcion": "NATACION MASTER", "precio": 550},
+        {"codigo": "4010200", "descripcion": "NIETO (15 A 24 AÑOS)", "precio": 4107},
+        {"codigo": "4010198", "descripcion": "NIETO (HASTA 14 AÑOS)", "precio": 2054},
+        {"codigo": "4010388", "descripcion": "NIETO SENIOR 30%", "precio": 4107},
+        {"codigo": "4010199", "descripcion": "PADRE", "precio": 4107},
+        {"codigo": "4010203", "descripcion": "SPINNING", "precio": 420},
+        {"codigo": "4040419", "descripcion": "UNIFORME DE JUEGO / ENTRENAMIENTO", "precio": 1850},
+        {"codigo": "4040483", "descripcion": "VOLEYBOL JUVENIL REFUERZO", "precio": 0},
+        {"codigo": "4040412", "descripcion": "VOLEYBOL REFUERZO", "precio": 1900}
+      ],
+      "Chapalita": [
+        {"codigo": "4040352", "descripcion": "APORT DE MANTTO IND P/CAPITAL CORPORATIVA", "precio": 4927},
+        {"codigo": "4010114", "descripcion": "APORT. DE MANTENIMIENTO NUEVAS FAMILIAS", "precio": 10498},
+        {"codigo": "4010130", "descripcion": "REFUERZO ESCUELA DE FUTBOL BECA 60%", "precio": 990},
+        {"codigo": "4010150", "descripcion": "INVITADO NIÑO", "precio": 790},
+        {"codigo": "4010123", "descripcion": "ESCUELA NATACION BEBE 4 DIAS X SEM", "precio": 1630},
+        {"codigo": "4010133", "descripcion": "ESCUELA DE TAE KWON DO", "precio": 0},
+        {"codigo": "4010120", "descripcion": "ESCUELA DE FUTBOL 2011,2012,2013 40% REFUER", "precio": 0},
+        {"codigo": "4010140", "descripcion": "ESCUELA DE YOGA 8 CLASES POR MES", "precio": 0},
+        {"codigo": "4010147", "descripcion": "INVITADO ADULTO", "precio": 990},
+        {"codigo": "4010115", "descripcion": "APORT. DE MANTTO. P/CAPITAL INDIVIDUAL", "precio": 6569},
+        {"codigo": "4010126", "descripcion": "ESCUELA DE NADO SINC PRINCIPIANTES", "precio": 0},
+        {"codigo": "4010132", "descripcion": "ESCUELA DE TAE KWO DO 2 DIAS POR SEMANA", "precio": 0},
+        {"codigo": "4010137", "descripcion": "ESCUELA DE MINITENIS BOLA PUNTO ROJO 2 DIAS X SEM", "precio": 1080},
+        {"codigo": "4010119", "descripcion": "ESC.NATACION EQUIPO", "precio": 1250},
+        {"codigo": "4010159", "descripcion": "ESCUELA DE TENIS BASICO III 5 DIAS", "precio": 1859},
+        {"codigo": "4010127", "descripcion": "ESCUELA DE NATACION 2 DIAS POR SEMANA", "precio": 1100},
+        {"codigo": "4010118", "descripcion": "ESCUELA DE FUTBOL INICIAL ACADEMIA", "precio": 800},
+        {"codigo": "4010151", "descripcion": "LOCKER RENTA ANUAL", "precio": 1270},
+        {"codigo": "4010141", "descripcion": "ESCUELA GIMNASIA O INTERMEDIOS 12 CLASES POR MES", "precio": 0},
+        {"codigo": "4010128", "descripcion": "ESCUELA DE NATACION PRE EQUIPO I", "precio": 1250},
+        {"codigo": "4010129", "descripcion": "ESCUELA DE NATACION PRE EQUIPO 2", "precio": 1250},
+        {"codigo": "4010121", "descripcion": "ESCUELA DE GIMNASIA O AVANZADOS", "precio": 0},
+        {"codigo": "4010131", "descripcion": "ESCUELA DE TAE KWON DO AVANZADO", "precio": 0},
+        {"codigo": "4010134", "descripcion": "ESCUELA DE TENIS BASICO I", "precio": 1076},
+        {"codigo": "4010135", "descripcion": "ESC DE MINITENIS BOLA PUNTO NARANJA 3 DIAS X SEM", "precio": 1360},
+        {"codigo": "4010136", "descripcion": "ESCUELA DE MINITENIS BOLA PUNTO VERDE 3 DIAS X SEM", "precio": 1360},
+        {"codigo": "4010117", "descripcion": "ESCUELA DE FUTBOL CONSOLIDACION ACADEMIA", "precio": 800},
+        {"codigo": "4010101", "descripcion": "APORTACION DE MANTENIMIENTO", "precio": 11690},
+        {"codigo": "4010125", "descripcion": "ESCUELA DE NADO SINC INTERMEDIOS", "precio": 0},
+        {"codigo": "4010124", "descripcion": "ESCUELA DE NADO SINC AVANZADOS", "precio": 0},
+        {"codigo": "4010138", "descripcion": "ESCUELA DE TENIS DESARROLLO 3 DIAS X SEM", "precio": 1650},
+        {"codigo": "4010338", "descripcion": "APORTACION DE MANTENIMIENTO ESPECIAL 50%", "precio": 5845},
+        {"codigo": "4010376", "descripcion": "CERTIFICADO FAMILIAR TEMPORAL", "precio": 34000},
+        {"codigo": "4010156", "descripcion": "COBRO DE TAG", "precio": 187},
+        {"codigo": "4010222", "descripcion": "CERTIFICADO FAMILIAR TEMPORAL NUEVAS FAMILIAS", "precio": 27305},
+        {"codigo": "4010377", "descripcion": "CERTIFICADO INDIVIDUAL TEMPORAL", "precio": 22100},
+        {"codigo": "4010196", "descripcion": "CUOTA ADICIONAL ESPECIAL 10%", "precio": 468},
+        {"codigo": "4010146", "descripcion": "INSCRIPCION ACADEMIAS", "precio": 500},
+        {"codigo": "4010105", "descripcion": "CUOTA COORPORATIVA (75%)", "precio": 8768},
+        {"codigo": "4010110", "descripcion": "CUOTA ESPECIAL 10%", "precio": 1169},
+        {"codigo": "4010186", "descripcion": "CUOTA JR (100%)", "precio": 11690},
+        {"codigo": "4010184", "descripcion": "CUOTA JR (20%)", "precio": 2338},
+        {"codigo": "4010195", "descripcion": "CUOTA JR A", "precio": 1754},
+        {"codigo": "4010116", "descripcion": "CUOTA JR B", "precio": 2923},
+        {"codigo": "4010122", "descripcion": "ESCUELA DE GIMNASIA O PRINCIPIANTES", "precio": 0},
+        {"codigo": "4010190", "descripcion": "ACADEMIA DE PADEL", "precio": 1200},
+        {"codigo": "4010197", "descripcion": "CUOTA JR C", "precio": 3507},
+        {"codigo": "4010224", "descripcion": "ESCUELA DE FUTBOL FEMENIL ASOCIADOS", "precio": 800},
+        {"codigo": "4010223", "descripcion": "ESCUELA DE FUTBOL 2008 - 2009 -2010 15% HNOS REFUE", "precio": 0},
+        {"codigo": "4010225", "descripcion": "REFUERZO INSCRIPCION NADO SINCRONIZADO", "precio": 0},
+        {"codigo": "4010351", "descripcion": "REFUERZO ESCUELA DE FUTBOL BECA 40%", "precio": 1480},
+        {"codigo": "4010352", "descripcion": "REFUERZO ESCUELA DE FUTBOL", "precio": 2470},
+        {"codigo": "4010353", "descripcion": "REFUERZO ESCUELA DE FUTBOL BECA 30%", "precio": 1730},
+        {"codigo": "4010354", "descripcion": "ESC DE FUTBOL CAT 14-15-16-17-18-19 -20-21REF 20%", "precio": 1975},
+        {"codigo": "4010107", "descripcion": "CUOTA JR SENIOR (15%)", "precio": 1754},
+        {"codigo": "4010108", "descripcion": "CUOTA JR SENIOR (30%)", "precio": 3507},
+        {"codigo": "4010182", "descripcion": "RENTA DE ESPACIO", "precio": 10846},
+        {"codigo": "4010365", "descripcion": "REFUERZO NADO SINCRONIZADO", "precio": 0},
+        {"codigo": "4040421", "descripcion": "ESCUELA DE TENIS DESARROLLO 5 DIAS X SEM", "precio": 2840},
+        {"codigo": "4040422", "descripcion": "ESCUELA DE TENIS COMPETITIVO 5 DIAS X SEM", "precio": 3975},
+        {"codigo": "4010112", "descripcion": "CUOTA JR SENIOR (35%)", "precio": 4092},
+        {"codigo": "4010113", "descripcion": "CUOTA JUNIOR (5%)", "precio": 585},
+        {"codigo": "4010109", "descripcion": "CUOTA JUNIOR CASADO", "precio": 7014},
+        {"codigo": "4010111", "descripcion": "CUOTA JUNIOR CASADO (80%)", "precio": 9352},
+        {"codigo": "4010104", "descripcion": "CUOTA UNIVERSITARIA", "precio": 4593},
+        {"codigo": "4010384", "descripcion": "HERMANO / SOBRINO CASADO HASTA + DE 40 AÑOS", "precio": 11690},
+        {"codigo": "4010383", "descripcion": "HERMANO / SOBRINO CASADO HASTA 39 AÑOS", "precio": 10521},
+        {"codigo": "4010380", "descripcion": "HERMANO / SOBRINO SOLTERO 25 A 29 AÑOS", "precio": 3507},
+        {"codigo": "4040424", "descripcion": "CLUB DE CONVERSACION EN INGLES", "precio": 286},
+        {"codigo": "4010381", "descripcion": "HERMANO / SOBRINO SOLTERO 30 A 34 AÑOS", "precio": 4676},
+        {"codigo": "4040434", "descripcion": "ESCUELA DE YOGA 4 CLASES POR MES", "precio": 0},
+        {"codigo": "4040435", "descripcion": "ESCUELA GIMNASIA O INTERMEDIOS 8 CLASES POR MES", "precio": 0},
+        {"codigo": "4040436", "descripcion": "ESCUELA DE FUTBOL CONSOLIDACION ACADEMIA 10%HNO", "precio": 720},
+        {"codigo": "4040437", "descripcion": "ESCUELA DE NATACION 2 DIAS POR SEMANA 10% POR HNOS", "precio": 990},
+        {"codigo": "4040438", "descripcion": "ESCUELA DE TENIS INICIAL 2 DIAS X SEM 10% POR HNOS", "precio": 1224},
+        {"codigo": "4040439", "descripcion": "ESCUELA DE TENIS DESARROLLO 3 DIAS X SEM 10% HNOS", "precio": 1485},
+        {"codigo": "4040441", "descripcion": "REFUERZO ESCUELA DE FUTBOL 10% HNOS", "precio": 2225},
+        {"codigo": "4040442", "descripcion": "ESCUELA DE NATACION PRE EQUIPO I II 10% POR HNOS", "precio": 1125},
+        {"codigo": "4040443", "descripcion": "ESC.NATACION EQUIPO 10% POR HNOS", "precio": 1125},
+        {"codigo": "4040444", "descripcion": "ESCUELA DE NADO SINC PRINCIPIANTES 10% POR HNOS", "precio": 0},
+        {"codigo": "4040445", "descripcion": "ESCUELA DE NADO SINC AVANZADO INTERMEDIO 10% HNOS", "precio": 0},
+        {"codigo": "4040446", "descripcion": "REFUERZO NADO SINCRONIZADO 10% POR HNOS", "precio": 0},
+        {"codigo": "4040447", "descripcion": "ESCUELA DE GIMNASIA O PRINCIPIANTES 10% POR HNOS", "precio": 0},
+        {"codigo": "4040448", "descripcion": "ESCUELA GIMNASIA O INTERM 12 CLASES X MES 10% HNOS", "precio": 0},
+        {"codigo": "4040449", "descripcion": "ESCUELA DE TAE KWON DO 10% POR HNOS", "precio": 0},
+        {"codigo": "4040450", "descripcion": "ESCUELA DE TENIS KINDER 10% POR HNOS", "precio": 975},
+        {"codigo": "4040451", "descripcion": "ESCUELA DE TENIS COMPETITIVO 5 DIAS X SEM 10% HNO", "precio": 3578},
+        {"codigo": "4040452", "descripcion": "ESCUELA DE YOGA 4 CLASES POR MES 10% POR HNOS", "precio": 0},
+        {"codigo": "4040453", "descripcion": "ESCUELA DE YOGA 8 CLASES POR MES 10% POR HNOS", "precio": 0},
+        {"codigo": "4040454", "descripcion": "REFUERZO ESCUELA DE FUTBOL BECA 80%", "precio": 500},
+        {"codigo": "4040455", "descripcion": "REFUERZO ESCUELA DE FUTBOL BECA 50%", "precio": 1235},
+        {"codigo": "4010283", "descripcion": "FUTBOL VETERANOS 1 DIA POR SEMANA", "precio": 1000},
+        {"codigo": "4010382", "descripcion": "HERMANO / SOBRINO SOLTERO MAYOR DE 35 AÑOS", "precio": 5261},
+        {"codigo": "4010387", "descripcion": "JR CASADO SENIOR 100%", "precio": 11690},
+        {"codigo": "4010385", "descripcion": "JR SENIOR 50%", "precio": 5845},
+        {"codigo": "4010386", "descripcion": "JR SENIOR 60%", "precio": 7014},
+        {"codigo": "4010363", "descripcion": "MENOR PAPÁ SOLTERO", "precio": 1968},
+        {"codigo": "4010200", "descripcion": "NIETO (15 A 24 AÑOS)", "precio": 3507},
+        {"codigo": "4010198", "descripcion": "NIETO (HASTA 14 AÑOS)", "precio": 1754},
+        {"codigo": "4010388", "descripcion": "NIETO SENIOR 30%", "precio": 3507},
+        {"codigo": "4010199", "descripcion": "PADRE", "precio": 2338},
+        {"codigo": "4040458", "descripcion": "ESC DE MINITENIS BOLA PUNTO ROJO 2 DIAS / REFUERZO", "precio": 1800},
+        {"codigo": "4040459", "descripcion": "ESC DE MINITENIS BOLA PUNTO NARANJA 3 DIAS/ REFUER", "precio": 2100},
+        {"codigo": "4040460", "descripcion": "ESC DE MINITENIS BOLA PUNTO VERDE 3 DIAS/ REFUERZO", "precio": 2100},
+        {"codigo": "4040461", "descripcion": "ESCUELA DE TENIS DESARROLLO 3 DIAS X SEM/ REFUERZO", "precio": 3150},
+        {"codigo": "4040463", "descripcion": "ESCUELA DE TENIS DESARROLLO 5 DIAS X SEM/ REFUERZO", "precio": 4300},
+        {"codigo": "4040464", "descripcion": "ESC DE TENIS COMPETITIVO 5 DIAS X SEM/ REFUERZO", "precio": 4300},
+        {"codigo": "4040468", "descripcion": "ESCUELA DE TENIS INICIAL 3 DIAS X SEMANA", "precio": 1470},
+        {"codigo": "4040469", "descripcion": "ESCUELA DE TENIS INICIAL 2 DIAS X SEM 10% HNO. REF", "precio": 2070},
+        {"codigo": "4040470", "descripcion": "ESC DE TENIS DESARROLLO 5 DIAS X SEM 10% HNO", "precio": 2556},
+        {"codigo": "4040471", "descripcion": "INSCRIPCION TENIS REFUERZOS", "precio": 750},
+        {"codigo": "4040472", "descripcion": "ESCUELA DE TENIS INICIAL 3 DIAS X SEMANA 10% HNO", "precio": 1325},
+        {"codigo": "4040473", "descripcion": "ESC DE TENIS INICIAL 3 DIAS X SEMANA REFUERZO", "precio": 2600},
+        {"codigo": "4040474", "descripcion": "ESC DE TENIS INICIAL 3 DIAS X SEM 10% HNO REFUERZO", "precio": 2340},
+        {"codigo": "4040475", "descripcion": "SEGURO DE GASTOS MEDICOS", "precio": 600},
+        {"codigo": "4040478", "descripcion": "FUTBOL VETERANOS REFUERZO 2 DIAS POR SEMANA", "precio": 1600},
+        {"codigo": "4040479", "descripcion": "FUTBOL VETERANOS REFUERZO 3 DIAS POR SEMANA", "precio": 2400},
+        {"codigo": "4010139", "descripcion": "ESCUELA DE TENIS COMPETITIVO 3 -5 DIAS X SEM SOCIO", "precio": 2270},
+        {"codigo": "4040440", "descripcion": "ESCUELA DE TENIS COMPETITIVO 3-5 DIAS X SEM 10% HN", "precio": 2043},
+        {"codigo": "4040462", "descripcion": "ESC DE TENIS COMPETITIVO 3 (5 DIAS X SEM/ REFUERZO", "precio": 3700},
+        {"codigo": "4040487", "descripcion": "ESCUELA DE TENIS INICIAL 2 DIAS X SEMANA", "precio": 1360},
+        {"codigo": "4040488", "descripcion": "ESCUELA DE TENIS INICIAL 2 DIAS X SEMANA REFUERZO", "precio": 2300},
+        {"codigo": "4040489", "descripcion": "ESC DE TENIS COMPETITIVO 5 DIAS X SEM (3 HRS)", "precio": 3975},
+        {"codigo": "4040490", "descripcion": "ESC DE TENIS COMPETITIVO 5 DIAS X SEM (3 HRS) REF", "precio": 5500},
+        {"codigo": "4040500", "descripcion": "ESC DE TENIS COMPETITIVO 3 DIAS X SEM (3 HRS)", "precio": 3300},
+        {"codigo": "4040501", "descripcion": "ESC DE TENIS COMPETITIVO 3 DIAS X SEM (3 HRS) REF", "precio": 4300},
+        {"codigo": "4040502", "descripcion": "ESC DE MINITENIS BOLA PUNTO NARANJA 2 DIAS X SEM", "precio": 1080},
+        {"codigo": "4040503", "descripcion": "ESC DE MINITENIS BOLA PUNTO NARANJA 2 DIAS/ REFUER", "precio": 1800},
+        {"codigo": "4040504", "descripcion": "ESCUELA DE TENIS INICIAL 5 DIAS X SEMANA", "precio": 2840},
+        {"codigo": "4040505", "descripcion": "ESC DE TENIS INICIAL 5 DIAS X SEMANA REFUERZO", "precio": 2535},
+        {"codigo": "4040506", "descripcion": "ESC DE TENIS COMPETITIVO 3 DIAS X SEM(3 HRS) 10% H", "precio": 2970},
+        {"codigo": "4040507", "descripcion": "ESC DE TENIS COMPETITIVO 3 DIAS XSEM(3 HRS) REF10%", "precio": 3870},
+        {"codigo": "4040508", "descripcion": "ESC DE MINITENIS BOLA PUNTO NARAN 2 DIAS X SEM 10%", "precio": 975},
+        {"codigo": "4040509", "descripcion": "ESC DE MINITENIS BOLA PUNTO NARAN 2 DIAS/ REF 10%", "precio": 1620},
+        {"codigo": "4040510", "descripcion": "ESCUELA DE TENIS INICIAL 5 DIAS X SEMANA 10% HNO", "precio": 2556},
+        {"codigo": "4040511", "descripcion": "ESC DE TENIS INICIAL 5 DIAS X SEMANA REF 10% HNO", "precio": 2280},
+        {"codigo": "4040512", "descripcion": "ESCUELA DE NATACION INVITADO DEPORTIVO", "precio": 1630},
+        {"codigo": "4040480", "descripcion": "BASQUETBOL FEMENIL - JUVENIL REFUERZO", "precio": 700},
+        {"codigo": "4040483", "descripcion": "VOLEYBOL JUVENIL REFUERZO", "precio": 700}
+      ],
+      "Country": [
+        {"codigo": "4040364", "descripcion": "15 PASES GOLF PACK", "precio": 27750},
+        {"codigo": "4010285", "descripcion": "APORT MTTO AJUSTE", "precio": 1500},
+        {"codigo": "4010303", "descripcion": "APORT MTTO CORP CHAPALITA FAMILIAR", "precio": 8985},
+        {"codigo": "4010304", "descripcion": "APORT MTTO CORP CHAPALITA FAMILIAR NON WEEKEND", "precio": 6957},
+        {"codigo": "4010305", "descripcion": "APORT MTTO CORP CHAPALITA INDIVIDUAL", "precio": 7255},
+        {"codigo": "4010302", "descripcion": "APORT MTTO CORP COLOMOS FAMILIAR", "precio": 8985},
+        {"codigo": "4010306", "descripcion": "APORT MTTO CORP COLOMOS INDIVIDUAL", "precio": 7255},
+        {"codigo": "4010290", "descripcion": "APORT MTTO EMPRESARIAL", "precio": 11980},
+        {"codigo": "4010309", "descripcion": "APORT MTTO ESPECIAL", "precio": 5990},
+        {"codigo": "4010291", "descripcion": "APORT MTTO FAMILIAR", "precio": 11980},
+        {"codigo": "4010293", "descripcion": "APORT MTTO FORANEA", "precio": 9849},
+        {"codigo": "4040360", "descripcion": "APORT MTTO FORANEA TEPA/CHAPALA FAMILIAR", "precio": 8095},
+        {"codigo": "4040361", "descripcion": "APORT MTTO FORANEA TEPA/CHAPALA INDIVIDUAL", "precio": 5895},
+        {"codigo": "4010299", "descripcion": "APORT MTTO GRUPAL FAMILIAR", "precio": 6835},
+        {"codigo": "4010298", "descripcion": "APORT MTTO GRUPAL INDIVIDUAL", "precio": 5580},
+        {"codigo": "4010295", "descripcion": "APORT MTTO INDIVIDUAL", "precio": 9670},
+        {"codigo": "4010308", "descripcion": "APORT MTTO INDIVIDUAL ESPECIAL", "precio": 7925},
+        {"codigo": "4010316", "descripcion": "APORT MTTO INDIVIDUAL ESPECIAL", "precio": 0},
+        {"codigo": "4040355", "descripcion": "APORT MTTO INDUS 2 USUARIOS", "precio": 16745},
+        {"codigo": "4040356", "descripcion": "APORT MTTO INDUS 3 USUARIOS", "precio": 23570},
+        {"codigo": "4040357", "descripcion": "APORT MTTO INDUS 4 USUARIOS", "precio": 30880},
+        {"codigo": "4040358", "descripcion": "APORT MTTO INDUS 5 USUARIOS", "precio": 37560},
+        {"codigo": "4040359", "descripcion": "APORT MTTO INDUS 6 USUARIOS", "precio": 44650},
+        {"codigo": "4010311", "descripcion": "APORT MTTO NO GOLF FAMILIAR", "precio": 6250},
+        {"codigo": "4010310", "descripcion": "APORT MTTO NO GOLF INDIVIDUAL", "precio": 4020},
+        {"codigo": "4010307", "descripcion": "APORT MTTO NON WEEKEND", "precio": 7515},
+        {"codigo": "4040353", "descripcion": "APORT MTTO NON WEEKEND FAMILIAR", "precio": 9276},
+        {"codigo": "4040365", "descripcion": "APORT MTTO NON WEKEEND CORP", "precio": 5633},
+        {"codigo": "4010289", "descripcion": "APORT MTTO UNIVERSITARIO", "precio": 3290},
+        {"codigo": "4040362", "descripcion": "CANASTA PELOTAS PRACTICA ASOCIADO", "precio": 45},
+        {"codigo": "4010301", "descripcion": "CERTIFICADO CORP.FAM.TEMPORAL", "precio": 5250},
+        {"codigo": "4010300", "descripcion": "CERTIFICADO CORP.INDIV.TEMPORAL", "precio": 2660},
+        {"codigo": "4010378", "descripcion": "CERTIFICADO FAMILIAR NO GOLF", "precio": 13350},
+        {"codigo": "4010376", "descripcion": "CERTIFICADO FAMILIAR TEMPORAL", "precio": 21000},
+        {"codigo": "4010379", "descripcion": "CERTIFICADO INDIVIDUAL NO GOLF", "precio": 6950},
+        {"codigo": "4010377", "descripcion": "CERTIFICADO INDIVIDUAL TEMPORAL", "precio": 10630},
+        {"codigo": "4010156", "descripcion": "COBRO DE TAG", "precio": 187},
+        {"codigo": "4010317", "descripcion": "COU AP. MTTO. CAP JR RENTISTA", "precio": 0},
+        {"codigo": "4010336", "descripcion": "COU AP. MTTO. CAP. TEMP. FAM", "precio": 0},
+        {"codigo": "4010292", "descripcion": "COU AP.MTTO CAP TEMP RENTISTA FAM", "precio": 0},
+        {"codigo": "4010287", "descripcion": "COU APORT MTTO CAP PROM 2 USUARIOS INDIVIDUAL", "precio": 0},
+        {"codigo": "4010294", "descripcion": "COU APORT MTTO DE CAPITAL SENIORS", "precio": 0},
+        {"codigo": "4010286", "descripcion": "COU APORT MTTO INDUSTRIAL 3 USUARIOS 71.22%", "precio": 0},
+        {"codigo": "4010288", "descripcion": "COU APORT MTTO RENTA 1/2FAMILIAR", "precio": 0},
+        {"codigo": "4010356", "descripcion": "COU APORTACION MTTO CAP INDUSTRAL 5 USUARIOS", "precio": 0},
+        {"codigo": "4010297", "descripcion": "COU APORTACION MTTO CAPITAL INDUSTRIAL", "precio": 0},
+        {"codigo": "4010296", "descripcion": "COU APORTACION MTTO DE CAPITAL JUVENIL", "precio": 0},
+        {"codigo": "4010355", "descripcion": "COU APORTACION MTTO. CAP ESPECIAL", "precio": 0},
+        {"codigo": "4010335", "descripcion": "COU CORP. COLOMOS INDIVIDUAL", "precio": 0},
+        {"codigo": "4040354", "descripcion": "COU CUOTA TEMP NO GOLF INDIVIDUAL", "precio": 0},
+        {"codigo": "4010184", "descripcion": "CUOTA JR (20%)", "precio": 2396},
+        {"codigo": "4010195", "descripcion": "CUOTA JR A", "precio": 1800},
+        {"codigo": "4010116", "descripcion": "CUOTA JR B", "precio": 2995},
+        {"codigo": "4010197", "descripcion": "CUOTA JR C", "precio": 3595},
+        {"codigo": "4010107", "descripcion": "CUOTA JR SENIOR (15%)", "precio": 1795},
+        {"codigo": "4010108", "descripcion": "CUOTA JR SENIOR (30%)", "precio": 3595},
+        {"codigo": "4010112", "descripcion": "CUOTA JR SENIOR (35%)", "precio": 4195},
+        {"codigo": "4010109", "descripcion": "CUOTA JUNIOR CASADO", "precio": 7190},
+        {"codigo": "4010111", "descripcion": "CUOTA JUNIOR CASADO (80%)", "precio": 9590},
+        {"codigo": "4010358", "descripcion": "ESCUELA DE FUTBOL 2011-2012-2013 REFUERZO", "precio": 720},
+        {"codigo": "4010237", "descripcion": "ESCUELA DE MINITENIS 2 DIAS POR SEMANA", "precio": 1000},
+        {"codigo": "4010329", "descripcion": "GREEN FEE ENTRE SEMANA", "precio": 2650},
+        {"codigo": "4010328", "descripcion": "GREEN FEE FIN DE SEMANA", "precio": 3020},
+        {"codigo": "4010312", "descripcion": "GREEN FEE JR/INVITADO ASOCIADO", "precio": 1510},
+        {"codigo": "4010313", "descripcion": "GREEN FEE JR/INVITADO ASOCIADO 50%", "precio": 755},
+        {"codigo": "4010314", "descripcion": "GREEN FEE JR/INVITADO ASOCIADO ENTRE SEMANA", "precio": 1325},
+        {"codigo": "4010315", "descripcion": "GREEN FEE JR/INVITADO ASOCIADO ENTRE SEMANA 50%", "precio": 663},
+        {"codigo": "4010323", "descripcion": "GUARDA EQUIPO", "precio": 1425},
+        {"codigo": "4010384", "descripcion": "HERMANO / SOBRINO CASADO HASTA + DE 40 AÑOS", "precio": 11980},
+        {"codigo": "4010383", "descripcion": "HERMANO / SOBRINO CASADO HASTA 39 AÑOS", "precio": 10781},
+        {"codigo": "4010380", "descripcion": "HERMANO / SOBRINO SOLTERO 25 A 29 AÑOS", "precio": 3594},
+        {"codigo": "4010381", "descripcion": "HERMANO / SOBRINO SOLTERO 30 A 34 AÑOS", "precio": 4792},
+        {"codigo": "4010382", "descripcion": "HERMANO / SOBRINO SOLTERO MAYOR DE 35 AÑOS", "precio": 5391},
+        {"codigo": "4010147", "descripcion": "INVITADO ADULTO", "precio": 650},
+        {"codigo": "4010150", "descripcion": "INVITADO NIÑO", "precio": 295},
+        {"codigo": "4010387", "descripcion": "JR CASADO SENIOR 100%", "precio": 11980},
+        {"codigo": "4010385", "descripcion": "JR SENIOR 50%", "precio": 5990},
+        {"codigo": "4010386", "descripcion": "JR SENIOR 60%", "precio": 7187},
+        {"codigo": "4010151", "descripcion": "LOCKER RENTA ANUAL", "precio": 1300},
+        {"codigo": "4010361", "descripcion": "MTTO CARRITO DE GOLF ESPECIAL", "precio": 1680},
+        {"codigo": "4010319", "descripcion": "MTTO CARRITO GOLF PARTICULAR", "precio": 2475},
+        {"codigo": "4010320", "descripcion": "MTTO CARRITO GOLF XL", "precio": 2915},
+        {"codigo": "4010200", "descripcion": "NIETO (15 A 24 AÑOS)", "precio": 3595},
+        {"codigo": "4010198", "descripcion": "NIETO (HASTA 14 AÑOS)", "precio": 1800},
+        {"codigo": "4010388", "descripcion": "NIETO SENIOR 30%", "precio": 3594},
+        {"codigo": "4010199", "descripcion": "PADRE", "precio": 2395},
+        {"codigo": "4010322", "descripcion": "PLAN CARRO GOLF COMPARTIDO", "precio": 2225},
+        {"codigo": "4010321", "descripcion": "PLAN CARRO GOLF FAMILIAR", "precio": 3000},
+        {"codigo": "4010318", "descripcion": "PLAN CARRO GOLF INDIVIDUAL", "precio": 2700},
+        {"codigo": "4010324", "descripcion": "RENTA CARRITO DE GOLF", "precio": 785},
+        {"codigo": "4010360", "descripcion": "RENTA DE EQUIPOS DE GOLF", "precio": 605}
+      ]
+    };
 
     let clubActual = 'Chapalita';
 
-    const formato = new Intl.NumberFormat('es-MX', {{
+    const formato = new Intl.NumberFormat('es-MX', {
       style: 'currency',
       currency: 'MXN',
       minimumFractionDigits: 0
-    }});
+    });
 
-    function cambiarClub(club) {{
+    function cambiarClub(club) {
       clubActual = club;
-      document.querySelectorAll('.tab-button').forEach(btn => {{
+      document.querySelectorAll('.tab-button').forEach(btn => {
         btn.classList.toggle('active', btn.textContent.trim() === club);
-      }});
+      });
       document.getElementById('buscador').value = '';
       filtrar();
-    }}
+    }
 
-    function filtrar() {{
+    function filtrar() {
       const termino = document.getElementById('buscador').value.toLowerCase().trim();
       const listaOriginal = DATA_PRECIOS[clubActual] || [];
 
-      const filtrados = listaOriginal.filter(item => {{
+      const filtrados = listaOriginal.filter(item => {
         const c = String(item.codigo || '').toLowerCase();
         const d = String(item.descripcion || '').toLowerCase();
         return c.includes(termino) || d.includes(termino);
-      }});
+      });
 
       renderizar(filtrados);
-    }}
+    }
 
-    function renderizar(datos) {{
+    function renderizar(datos) {
       const tbody = document.getElementById('tabla-cuerpo');
       const vacio = document.getElementById('sin-resultados');
       const contador = document.getElementById('contador');
 
       tbody.innerHTML = '';
-      contador.textContent = `${{datos.length}} concepto(s)`;
+      contador.textContent = `${datos.length} concepto(s)`;
 
-      if (datos.length === 0) {{
+      if (datos.length === 0) {
         vacio.style.display = 'block';
         return;
-      }}
+      }
       vacio.style.display = 'none';
 
       const fragment = document.createDocumentFragment();
-      datos.forEach(item => {{
+      datos.forEach(item => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td class="col-code">${{item.codigo}}</td>
-          <td>${{item.descripcion}}</td>
-          <td class="col-price">${{formato.format(item.precio)}}</td>
+          <td class="col-code">${item.codigo}</td>
+          <td>${item.descripcion}</td>
+          <td class="col-price">${formato.format(item.precio)}</td>
         `;
         fragment.appendChild(tr);
-      }});
+      });
       tbody.appendChild(fragment);
-    }}
+    }
 
-    window.onload = function() {{
+    window.onload = function() {
       cambiarClub('Chapalita');
-    }};
+    };
   </script>
 </body>
-</html>"""
-
-with open('index.html', 'w', encoding='utf-8') as f:
-    f.write(html_code)
-
-print("Saved cleanly. File size:", len(html_code))
+</html>
