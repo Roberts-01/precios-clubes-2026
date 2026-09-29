@@ -1,16 +1,272 @@
-# Let's inspect the code we generated in the previous turn.
-# In the previous turn, the user pasted HTML that called `<script src="data.js"></script>`!
-# BUT data.js is either missing, has CORS issues, or is not in the same directory.
-# Notice in image_b4afba.png / image_b518f3.png:
-# When index.html has `<script src="data.js"></script>`, DATA_PRECIOS is undefined!
-# So listaOriginal is []! That's why it says "0 concepto(s)" and "No se encontraron conceptos"!
-#
-# To make it 1000% bulletproof and NEVER fail:
-# The data MUST be embedded directly in the `<script>` tag inside index.html!
-# And the title "Tarifarios de cargos 2026" must be completely removed.
-#
-# Let's verify what data is in 'precios 2026.xlsx' and check if 4010101 exists in Chapalita:
+# Let's inspect why the previous HTML failed:
+# In the previous message, I wrote:
+# <script src="data.js"></script>
+# BUT data.js wasn't present or wasn't loaded! So DATA_PRECIOS was empty!
+# That is why it says "0 concepto(s)" and "No se encontraron conceptos que coincidan con la búsqueda."!
+# To make it work in 1 single step without any missing data, we need the HTML file to contain ALL the data inside <script> const DATA_PRECIOS = ... </script> AND NOT HAVE <script src="data.js"></script>!
+
+# Let's verify our exact script and generate a ready-to-download file and also give clear instructions.
+import json
 import pandas as pd
-df_chap = pd.read_excel('precios 2026.xlsx', sheet_name='Chapalita', header=None)
-print("Row matching 4010101 in Chapalita:")
-print(df_chap[df_chap.isin(['4010101', 4010101]).any(axis=1)])
+
+xls = pd.ExcelFile('precios 2026.xlsx')
+data_dict = {}
+for sheet in xls.sheet_names:
+    raw = pd.read_excel('precios 2026.xlsx', sheet_name=sheet, header=None)
+    df = raw.iloc[4:].copy()
+    df.columns = ['codigo', 'descripcion', 'precio']
+    df = df.dropna(subset=['codigo', 'descripcion'])
+    df['codigo'] = df['codigo'].astype(str).str.strip().str.replace('.0', '', regex=False)
+    df['descripcion'] = df['descripcion'].astype(str).str.strip()
+    df['precio'] = pd.to_numeric(df['precio'], errors='coerce').fillna(0)
+    data_dict[sheet] = df.to_dict(orient='records')
+
+json_str = json.dumps(data_dict, ensure_ascii=False)
+
+html_code = f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Precios 2026</title>
+  <style>
+    * {{
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }}
+    body {{
+      background-color: #f8fafc;
+      color: #0f172a;
+      padding: 25px 15px;
+    }}
+    .container {{
+      max-width: 950px;
+      margin: 0 auto;
+    }}
+    header {{
+      text-align: center;
+      margin-bottom: 20px;
+    }}
+    header p {{
+      color: #64748b;
+      font-size: 1rem;
+      font-weight: 600;
+    }}
+    .tabs-container {{
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }}
+    .tab-button {{
+      padding: 10px 24px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      border: 1px solid #cbd5e1;
+      border-radius: 20px;
+      background: #ffffff;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s;
+    }}
+    .tab-button.active {{
+      background: #dc2626;
+      color: #ffffff;
+      border-color: #dc2626;
+      box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);
+    }}
+    .search-card {{
+      background: #ffffff;
+      padding: 14px 18px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }}
+    @media (min-width: 600px) {{
+      .search-card {{
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }}
+    }}
+    .search-input {{
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      outline: none;
+    }}
+    .search-input:focus {{
+      border-color: #dc2626;
+    }}
+    .counter-badge {{
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #64748b;
+      white-space: nowrap;
+    }}
+    .table-container {{
+      background: #ffffff;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      overflow-x: auto;
+    }}
+    table {{
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }}
+    th, td {{
+      padding: 12px 16px;
+      border-bottom: 1px solid #e2e8f0;
+    }}
+    th {{
+      background-color: #f1f5f9;
+      color: #475569;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }}
+    tbody tr:hover {{
+      background-color: #f8fafc;
+    }}
+    .col-code {{
+      font-family: monospace;
+      color: #64748b;
+      font-weight: bold;
+      width: 120px;
+    }}
+    .col-price {{
+      text-align: right;
+      font-weight: bold;
+      color: #047857;
+      width: 150px;
+    }}
+    th.col-price {{
+      text-align: right;
+    }}
+    .empty-state {{
+      padding: 40px;
+      text-align: center;
+      color: #64748b;
+      display: none;
+    }}
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <p>Consulta rápida de cuotas y conceptos autorizados</p>
+    </header>
+
+    <div class="tabs-container">
+      <button class="tab-button active" onclick="cambiarClub('Chapalita')">Chapalita</button>
+      <button class="tab-button" onclick="cambiarClub('Colomos')">Colomos</button>
+      <button class="tab-button" onclick="cambiarClub('Country')">Country</button>
+    </div>
+
+    <div class="search-card">
+      <input 
+        type="text" 
+        id="buscador" 
+        class="search-input" 
+        placeholder="Buscar por código o descripción..." 
+        oninput="filtrar()"
+      />
+      <div class="counter-badge" id="contador">0 concepto(s)</div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-code">CÓDIGO</th>
+            <th>DESCRIPCIÓN</th>
+            <th class="col-price">PRECIO VENTA</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-cuerpo"></tbody>
+      </table>
+      <div id="sin-resultados" class="empty-state">
+        No se encontraron conceptos que coincidan con la búsqueda.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DATA_PRECIOS = {json_str};
+
+    let clubActual = 'Chapalita';
+
+    const formato = new Intl.NumberFormat('es-MX', {{
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 0
+    }});
+
+    function cambiarClub(club) {{
+      clubActual = club;
+      document.querySelectorAll('.tab-button').forEach(btn => {{
+        btn.classList.toggle('active', btn.textContent.trim() === club);
+      }});
+      document.getElementById('buscador').value = '';
+      filtrar();
+    }}
+
+    function filtrar() {{
+      const termino = document.getElementById('buscador').value.toLowerCase().trim();
+      const listaOriginal = DATA_PRECIOS[clubActual] || [];
+
+      const filtrados = listaOriginal.filter(item => {{
+        const c = String(item.codigo || '').toLowerCase();
+        const d = String(item.descripcion || '').toLowerCase();
+        return c.includes(termino) || d.includes(termino);
+      }});
+
+      renderizar(filtrados);
+    }}
+
+    function renderizar(datos) {{
+      const tbody = document.getElementById('tabla-cuerpo');
+      const vacio = document.getElementById('sin-resultados');
+      const contador = document.getElementById('contador');
+
+      tbody.innerHTML = '';
+      contador.textContent = `${{datos.length}} concepto(s)`;
+
+      if (datos.length === 0) {{
+        vacio.style.display = 'block';
+        return;
+      }}
+      vacio.style.display = 'none';
+
+      const fragment = document.createDocumentFragment();
+      datos.forEach(item => {{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="col-code">${{item.codigo}}</td>
+          <td>${{item.descripcion}}</td>
+          <td class="col-price">${{formato.format(item.precio)}}</td>
+        `;
+        fragment.appendChild(tr);
+      }});
+      tbody.appendChild(fragment);
+    }}
+
+    window.onload = function() {{
+      cambiarClub('Chapalita');
+    }};
+  </script>
+</body>
+</html>"""
+
+with open('index.html', 'w', encoding='utf-8') as f:
+    f.write(html_code)
+
+print("Saved cleanly. File size:", len(html_code))
